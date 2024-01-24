@@ -1,0 +1,16 @@
+eureka:
+  client:
+    register-with-eureka: false
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: userservice
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/v1/user/**
+server:
+  port: 8222
