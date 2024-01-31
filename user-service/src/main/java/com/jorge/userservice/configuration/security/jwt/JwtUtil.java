@@ -1,13 +1,19 @@
 package com.jorge.userservice.configuration.security.jwt;
 
+import com.jorge.userservice.exceptions.AuthException;
+import com.jorge.userservice.exceptions.JwtValidationException;
+import com.jorge.userservice.exceptions.UserNotFoundException;
 import com.jorge.userservice.exceptions.jwt.TokenExpiredException;
 import com.jorge.userservice.exceptions.jwt.TokenInvalidException;
 import com.jorge.userservice.exceptions.jwt.TokenMalformedException;
 import com.jorge.userservice.exceptions.jwt.TokenSignatureException;
+import com.jorge.userservice.model.User;
+import com.jorge.userservice.repository.UserRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -19,9 +25,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
     @Value("${application.jwt.key}")
     private String SECRET_KEY;
+    private final UserRepository userRepository;
 
     public String generateToken(UserDetails user){
         return generateToken(new HashMap<>(), user);
@@ -75,6 +83,17 @@ public class JwtUtil {
     public boolean isTokenValid(String token, UserDetails user){
         var username = extractUsername(token);
         return (username.equals(user.getUsername()) && !isTokenExpired(token));
+    }
+
+    public User validateToken(String token){
+        try {
+            String username = extractUsername(token);   // VALIDATES WITH extractAllClaims()
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UserNotFoundException("User does not exist"));
+        }
+        catch (Exception ex){
+            throw new JwtValidationException(ex.getMessage());
+        }
     }
 
 

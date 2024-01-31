@@ -3,6 +3,7 @@ package com.jorge.userservice.service;
 import com.jorge.userservice.configuration.security.jwt.JwtUtil;
 import com.jorge.userservice.exceptions.AuthException;
 import com.jorge.userservice.model.Role;
+import com.jorge.userservice.model.User;
 import com.jorge.userservice.model.dto.LoginRequest;
 import com.jorge.userservice.model.dto.LoginResponse;
 import com.jorge.userservice.model.dto.UserDTO;
@@ -38,7 +39,7 @@ public class UserService {
                 .toList();
     }
 
-    public LoginResponse login(@RequestBody LoginRequest loginRequest){
+    public LoginResponse login(LoginRequest loginRequest){
         try {
             UsernamePasswordAuthenticationToken userLogin =
                     new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
@@ -49,5 +50,14 @@ public class UserService {
         } catch (AuthenticationException ex) {
             throw new AuthException("Login failed. wrong credentials");
         }
+    }
+
+    public UserDTO validateToken(String token) {
+        User user = jwtUtil.validateToken(token);
+        return UserDTO.builder()
+                .username(user.getUsername())
+                .roles(user.getRoles().stream()
+                        .map(Role::getName).collect(Collectors.toSet()))
+                .build();
     }
 }

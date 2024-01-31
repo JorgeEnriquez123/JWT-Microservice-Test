@@ -34,4 +34,9 @@ public class UserController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok().body(userService.login(loginRequest));
     }
+
+    @PostMapping("/validateToken")
+    public ResponseEntity<UserDTO> validateToken(@RequestParam String token){
+        return ResponseEntity.ok().body(userService.validateToken(token));
+    }
 }

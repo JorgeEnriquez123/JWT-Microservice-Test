@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
-public class LoginErrorResponse {
+public class ExceptionResponse {
     int status;
     String message;
 }
