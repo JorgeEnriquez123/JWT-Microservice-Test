@@ -3,9 +3,11 @@ package com.jorge.userservice.controller;
 import com.jorge.userservice.configuration.security.jwt.JwtUtil;
 import com.jorge.userservice.exceptions.AuthException;
 import com.jorge.userservice.model.Role;
+import com.jorge.userservice.model.User;
 import com.jorge.userservice.model.dto.LoginRequest;
 import com.jorge.userservice.model.dto.LoginResponse;
 import com.jorge.userservice.model.dto.UserDTO;
+import com.jorge.userservice.model.dto.UserSignUpDTO;
 import com.jorge.userservice.repository.UserRepository;
 import com.jorge.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,10 @@ public class UserController {
     @GetMapping("")
     public List<UserDTO> findAll(){
         return userService.findAll();
+    }
+    @PostMapping("/save")
+    public UserDTO save(@RequestBody UserSignUpDTO user){
+        return userService.save(user);
     }
 
     @PostMapping("/login")
