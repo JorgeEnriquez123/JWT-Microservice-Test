@@ -7,6 +7,7 @@ import com.jorge.userservice.model.dto.LoginRequest;
 import com.jorge.userservice.model.dto.LoginResponse;
 import com.jorge.userservice.model.dto.UserDTO;
 import com.jorge.userservice.repository.UserRepository;
+import com.jorge.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,37 +23,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
 public class UserController {
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
-    // Quick usage | no service class
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("")
     public List<UserDTO> findAll(){
-        return userRepository.findAll().stream()
-                .map(user ->
-                        UserDTO.builder()
-                                .username(user.getUsername())
-                                .roles(user.getRoles().stream()
-                                        .map(Role::getName).collect(Collectors.toSet()))
-                                .build())
-                .toList();
+        return userService.findAll();
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
-
-        try {
-            UsernamePasswordAuthenticationToken userLogin =
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
-            UserDetails authenticatedUser = (UserDetails) authenticationManager.authenticate(userLogin).getPrincipal();
-            return ResponseEntity.ok().body(
-                    LoginResponse.builder()
-                            .access_token(jwtUtil.generateToken(authenticatedUser))
-                            .build()
-            );
-        } catch (AuthenticationException ex) {
-            throw new AuthException("Login failed. wrong credentials");
-        }
+        return ResponseEntity.ok().body(userService.login(loginRequest));
     }
 }

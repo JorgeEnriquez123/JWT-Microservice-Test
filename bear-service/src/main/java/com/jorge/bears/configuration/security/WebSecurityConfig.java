@@ -16,7 +16,9 @@ public class WebSecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(request -> request
-                        .anyRequest().permitAll())
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/api/v1/bear").permitAll() // Free temporal Access
+                        .anyRequest().authenticated())
                 .build();
     }
 }
