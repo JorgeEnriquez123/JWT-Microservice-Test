@@ -16,5 +16,7 @@ spring:
           uri: lb://BEAR-SERVICE
           predicates:
             - Path=/api/v1/bear/**
+          filters:
+            - AuthenticationFilter
 server:
   port: 8222

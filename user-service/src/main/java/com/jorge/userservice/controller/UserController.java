@@ -31,7 +31,7 @@ public class UserController {
     public List<UserDTO> findAll(){
         return userService.findAll();
     }
-    @PostMapping("/save")
+    @PostMapping("/register")
     public UserDTO save(@RequestBody UserSignUpDTO user){
         return userService.save(user);
     }
