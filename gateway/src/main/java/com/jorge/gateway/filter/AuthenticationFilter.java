@@ -6,9 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
@@ -28,7 +32,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
             if (routeValidator.isSecured.test(request)) {
                 if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                    throw new FailedAuthenticationException("Missing Authorization Header");
+                    return onError(exchange, "Missing Authorization Header", HttpStatus.UNAUTHORIZED);
                 }
                 String jwtHeader = extractJwtFromHeader(request);
 
@@ -44,10 +48,23 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                                     .header("auth-user-roles", userRolesAsString);
                             return exchange;
                         })
-                        .flatMap(chain::filter);
+                        .flatMap(chain::filter)
+                        .onErrorResume(
+                                e -> {
+                                    System.out.println(e.getMessage());
+                                    return onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
+                                });
+                        // Triggered if any error occurs during the process of WebClient,
+                            // such as network error, JSON parsins error, or any exception thrown by the map()
             }
             return chain.filter(exchange);
         };
+    }
+
+    private Mono<Void> onError(ServerWebExchange exchange, String error, HttpStatus httpStatus) {
+        ServerHttpResponse response = exchange.getResponse();
+        response.setStatusCode(httpStatus);
+        return response.setComplete();
     }
 
     private String extractJwtFromHeader(ServerHttpRequest request) {
