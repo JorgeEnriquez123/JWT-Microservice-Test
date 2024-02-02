@@ -11,6 +11,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -32,10 +33,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
             if (routeValidator.isSecured.test(request)) {
                 if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                    return onError(exchange, "Missing Authorization Header", HttpStatus.UNAUTHORIZED);
+                    return onError(exchange, HttpStatus.UNAUTHORIZED);
                 }
                 String jwtHeader = extractJwtFromHeader(request);
 
+                // JWT Validation could be done locally to reduce network latency
                 return webClientBuilder.build()
                         .post()
                         .uri("http://USER-SERVICE/api/v1/user/validateToken?token=" + jwtHeader)
@@ -50,18 +52,16 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                         })
                         .flatMap(chain::filter)
                         .onErrorResume(
-                                e -> {
-                                    System.out.println(e.getMessage());
-                                    return onError(exchange, e.getMessage(), HttpStatus.UNAUTHORIZED);
-                                });
+                                e -> onError(exchange, HttpStatus.UNAUTHORIZED));
                         // Triggered if any error occurs during the process of WebClient,
                             // such as network error, JSON parsins error, or any exception thrown by the map()
+                            // WebClient could throw a special Exception if requests have 4XX or 5XX code
             }
             return chain.filter(exchange);
         };
     }
 
-    private Mono<Void> onError(ServerWebExchange exchange, String error, HttpStatus httpStatus) {
+    private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(httpStatus);
         return response.setComplete();
