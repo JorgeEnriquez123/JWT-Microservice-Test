@@ -1,17 +1,17 @@
 package com.jorge.gateway.filter;
 
 import com.jorge.gateway.dto.UserDto;
-import com.jorge.gateway.exception.FailedAuthenticationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.jorge.gateway.exception.AuthenticationException;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -33,7 +33,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
             if (routeValidator.isSecured.test(request)) {
                 if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                    return onError(exchange, HttpStatus.UNAUTHORIZED);
+                    throw new AuthenticationException("Authentication Failed");
                 }
                 String jwtHeader = extractJwtFromHeader(request);
 
@@ -52,7 +52,15 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                         })
                         .flatMap(chain::filter)
                         .onErrorResume(
-                                e -> onError(exchange, HttpStatus.UNAUTHORIZED));
+                                e -> {
+                                    if (e instanceof WebClientResponseException && ((WebClientResponseException) e).getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                                        throw new AuthenticationException("Authentication Failed");
+                                    }
+                                    else {
+                                        // Handle other exceptions differently
+                                        throw new RuntimeException("Unexcepted error occurred", e);
+                                    }
+                                });
                         // Triggered if any error occurs during the process of WebClient,
                             // such as network error, JSON parsins error, or any exception thrown by the map()
                             // WebClient could throw a special Exception if requests have 4XX or 5XX code
@@ -60,19 +68,12 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             return chain.filter(exchange);
         };
     }
-
-    private Mono<Void> onError(ServerWebExchange exchange, HttpStatus httpStatus) {
-        ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(httpStatus);
-        return response.setComplete();
-    }
-
     private String extractJwtFromHeader(ServerHttpRequest request) {
-        String authheader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (!authheader.startsWith("Bearer ")) {
-            throw new FailedAuthenticationException("Invalid Authorization Header");
+        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (!authHeader.startsWith("Bearer ")) {
+            throw new AuthenticationException("Invalid Authorization Header");
         }
-        return authheader.substring(7);
+        return authHeader.substring(7);
 
     }
 
