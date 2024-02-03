@@ -1,6 +1,7 @@
 package com.jorge.gateway.handler;
 
 import com.jorge.gateway.exception.AuthenticationException;
+import com.jorge.gateway.exception.UserServiceNotAvailableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
@@ -64,7 +65,7 @@ public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHan
         }
         else if (throwable instanceof AuthenticationException) {
             return HttpStatus.UNAUTHORIZED;
-        } else if (throwable instanceof WebClientResponseException.ServiceUnavailable) {
+        } else if (throwable instanceof UserServiceNotAvailableException) {
             return HttpStatus.SERVICE_UNAVAILABLE;
         } else {
             return HttpStatus.INTERNAL_SERVER_ERROR;
@@ -79,7 +80,7 @@ public class GlobalErrorWebExceptionHandler extends AbstractErrorWebExceptionHan
         } else if (httpStatus == HttpStatus.SERVICE_UNAVAILABLE) {
             log.warn("Service unavailable: {}", throwable.getMessage(), throwable);
         } else {
-            log.info("Error occurred: {}", throwable.getMessage(), throwable);
+            log.error("Error occurred: {}", throwable.getMessage(), throwable);
         }
     }
 }

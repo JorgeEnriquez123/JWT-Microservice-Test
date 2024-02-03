@@ -2,6 +2,7 @@ package com.jorge.gateway.filter;
 
 import com.jorge.gateway.dto.UserDto;
 import com.jorge.gateway.exception.AuthenticationException;
+import com.jorge.gateway.exception.UserServiceNotAvailableException;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.core.annotation.Order;
@@ -14,6 +15,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class AuthenticationFilter extends AbstractGatewayFilterFactory<AuthenticationFilter.Config> {
@@ -51,23 +54,25 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                             return exchange;
                         })
                         .flatMap(chain::filter)
-                        .onErrorResume(
-                                e -> {
-                                    if (e instanceof WebClientResponseException && ((WebClientResponseException) e).getStatusCode() == HttpStatus.UNAUTHORIZED) {
-                                        throw new AuthenticationException("Authentication Failed");
-                                    }
-                                    else {
-                                        // Handle other exceptions differently
-                                        throw new RuntimeException("Unexcepted error occurred", e);
-                                    }
-                                });
+                        .onErrorResume(WebClientResponseException.class, this::handleWebClientResponseException);
                         // Triggered if any error occurs during the process of WebClient,
-                            // such as network error, JSON parsins error, or any exception thrown by the map()
+                            // such as network error, JSON parsing error, or any exception thrown by the map()
                             // WebClient could throw a special Exception if requests have 4XX or 5XX code
             }
             return chain.filter(exchange);
         };
     }
+
+    private Mono<Void> handleWebClientResponseException(WebClientResponseException e) {
+        if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+            return Mono.error(new AuthenticationException("Authentication Failed"));
+        } else if (e.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE) {
+            return Mono.error(new UserServiceNotAvailableException("User service is not available for validation"));
+        } else {
+            return Mono.error(new RuntimeException("Unexpected error occurred", e));
+        }
+    }
+
     private String extractJwtFromHeader(ServerHttpRequest request) {
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (!authHeader.startsWith("Bearer ")) {
