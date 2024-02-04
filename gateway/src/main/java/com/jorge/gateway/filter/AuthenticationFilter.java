@@ -43,7 +43,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                 // JWT Validation could be done locally to reduce network latency
                 return webClientBuilder.build()
                         .post()
-                        .uri("http://USER-SERVICE/api/v1/user/validateToken?token=" + jwtHeader)
+                        .uri("http://USER-SERVICE/user/validateToken?token=" + jwtHeader)
                         .retrieve().bodyToMono(UserDto.class)
                         .map(userDto -> {
                             String userRolesAsString = String.join(",", userDto.getRoles());
