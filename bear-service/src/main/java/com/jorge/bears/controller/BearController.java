@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/bear")
+@RequestMapping("/bear")
 public class BearController {
     private final BearRepository bearRepository;
     @GetMapping

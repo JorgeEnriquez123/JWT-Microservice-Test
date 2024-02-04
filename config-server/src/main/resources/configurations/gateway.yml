@@ -11,11 +11,11 @@ spring:
         - id: userservice
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/api/v1/user/**
+            - Path=/user/**
         - id: bearservice
           uri: lb://BEAR-SERVICE
           predicates:
-            - Path=/api/v1/bear/**
+            - Path=/bear/**
           filters:
             - AuthenticationFilter
 server:
