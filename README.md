@@ -1,11 +1,11 @@
 # Spring Microservice + JWT Test implementation
 This project demonstrates a basic implementation of JWT Security in a simple Microservice architecture.
 
-The process consists in sending a JWT on each request, which will be caught by the API Gateway and validate it through a User-Service.
+The process involves sending a JWT with each request. This JWT is intercepted by the API Gateway and validated via a User-Service.
 <br>
-If validation goes wrong, the request will end with an Authorization Error. otherwise, the User-service will return a UserDto which contains the username and roles.
+If the validation fails, the request ends with an Authorization Error. On the other hand, if the validation is successful, the User-service will return a UserDto that includes the username and roles of the User.
 <br>
-This info will be passed on to the inner microservices through headers to make use of Role-based secured endpoints if needed.
+This info is then passed along to the inner microservices via headers, enabling the use of Role-based secured endpoints when necessary.
 
 ![Flow Diagram](/images/Flow%20Diagram.jpg "Flow diagram")
 
@@ -55,7 +55,7 @@ This info will be passed on to the inner microservices through headers to make u
 User needs to include the Access Token in all their requests to access the microservices.
 
 ### Gateway Filter Process
-1. Gateway checks if incoming request route requires authentication.
+1. Gateway checks if the incoming request route requires authentication.
 2. If path requires authentication, it makes an asynchronous HTTP request to ```user-service``` along with the JWT for verification.
 3. If verification goes right, it returns a [UserDTO](https://github.com/JorgeEnriquez123/JWT-Microservice-Test/blob/main/gateway/src/main/java/com/jorge/gateway/dto/UserDto.java) with info about the user (username and roles)
 ```json
