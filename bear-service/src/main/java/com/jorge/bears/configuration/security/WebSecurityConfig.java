@@ -23,8 +23,20 @@ public class WebSecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/api/v1/bear").permitAll() // Free temporal Access
+                        .requestMatchers("/actuator/**", "/error").permitAll()
+                        .requestMatchers(
+                                "/v2/api-docs",
+                                "v3/api-docs",
+                                "v3/api-docs/**",
+                                "/swagger-resources",
+                                "/swagger-resources/**",
+                                "/configuration/ui",
+                                "/configuration/security",
+                                "/swagger-ui/**",
+                                "/swagger-ui/index.html",
+                                "/webjars/**",
+                                "/swagger-ui.html"
+                                ).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(customEntryPoint)
