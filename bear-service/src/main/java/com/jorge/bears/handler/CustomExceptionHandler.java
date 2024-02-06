@@ -15,11 +15,11 @@ import java.time.format.DateTimeFormatter;
 @RestControllerAdvice
 public class CustomExceptionHandler {
 
-    /*@ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ErrorResponseDto handleAuthenticationException(AuthenticationException ex) {
-        return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED);
-    }*/
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponseDto handleAuthenticationException(RuntimeException ex) {
+        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
