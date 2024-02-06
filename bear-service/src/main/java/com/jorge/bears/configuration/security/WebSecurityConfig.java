@@ -1,5 +1,6 @@
 package com.jorge.bears.configuration.security;
 
+import com.jorge.bears.handler.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +14,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
     @Autowired
     AuthFilter authFilter;
+    @Autowired
+    CustomAuthenticationEntryPoint customEntryPoint;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http
@@ -23,6 +26,10 @@ public class WebSecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/api/v1/bear").permitAll() // Free temporal Access
                         .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customEntryPoint)
+
+                )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

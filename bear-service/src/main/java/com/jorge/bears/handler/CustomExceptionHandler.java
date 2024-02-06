@@ -10,15 +10,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
 
-    @ExceptionHandler(AuthenticationException.class)
+    /*@ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponseDto handleAuthenticationException(AuthenticationException ex) {
         return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED);
-    }
+    }*/
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -27,8 +28,9 @@ public class CustomExceptionHandler {
     }
 
     private ErrorResponseDto buildErrorResponse(Exception ex, HttpStatus httpStatus) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         return ErrorResponseDto.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now().format(formatter))
                 .status(httpStatus.value())
                 .message(ex.getMessage())
                 .build();
