@@ -46,7 +46,7 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                         .uri("http://USER-SERVICE/user/validateToken?token=" + jwtHeader)
                         .retrieve().bodyToMono(UserDto.class)
                         .map(userDto -> {
-                            String userRolesAsString = String.join(",", userDto.getRoles());
+                            String userRolesAsString = String.join(", ", userDto.getRoles());
                             exchange.getRequest()
                                     .mutate()
                                     .header("auth-user-username", userDto.getUsername())

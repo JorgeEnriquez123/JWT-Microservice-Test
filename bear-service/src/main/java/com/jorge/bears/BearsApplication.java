@@ -21,5 +21,23 @@ public class BearsApplication implements CommandLineRunner {
 		bearRepository.save(Bear.builder()
 				.name("Shiro")
 				.species("Polar Bear").build());
+		bearRepository.save(Bear.builder()
+				.name("Baloo")
+				.species("Sloth bear").build());
+		bearRepository.save(Bear.builder()
+				.name("Kodiak")
+				.species("Kodiak bear").build());
+		bearRepository.save(Bear.builder()
+				.name("Yogi")
+				.species("Grizzly bear").build());
+		bearRepository.save(Bear.builder()
+				.name("Paddington")
+				.species("Brown bear").build());
+		bearRepository.save(Bear.builder()
+				.name("Bo")
+				.species("American black bear").build());
+		bearRepository.save(Bear.builder()
+				.name("Smokey")
+				.species("Grizzly bear").build());
 	}
 }

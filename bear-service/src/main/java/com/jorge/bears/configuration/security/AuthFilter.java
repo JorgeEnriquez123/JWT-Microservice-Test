@@ -24,7 +24,7 @@ public class AuthFilter extends OncePerRequestFilter {
 
         // Set SecurityContext
         if(username != null && roles != null){
-            List<SimpleGrantedAuthority> authorities = Arrays.stream(roles.split(","))
+            List<SimpleGrantedAuthority> authorities = Arrays.stream(roles.split(", "))
                     .map(SimpleGrantedAuthority::new)
                     .toList();
             UsernamePasswordAuthenticationToken authentication =
