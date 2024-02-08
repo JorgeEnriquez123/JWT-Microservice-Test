@@ -27,6 +27,7 @@ This info is then passed along to the inner microservices via headers, enabling 
 * **[Spring Cloud Config](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/)** for concentrate configuration.
 * **[Spring Cloud Netflix](https://cloud.spring.io/spring-cloud-netflix/reference/html/)** for service discovery and registration in Eureka.
 * **[WebClient](https://docs.spring.io/spring-framework/reference/web/webflux-webclient.html)** for performing asynchronous HTTP requests.
+* **[Swagger 3](https://springdoc.org/)** For API Documentation.
 
 ## Usage
 ### API Endpoints
