@@ -3,3 +3,5 @@ spring:
     name: bear-service
   config:
     import: optional:configserver:http://localhost:8888
+springdoc:
+  override-with-generic-response: false

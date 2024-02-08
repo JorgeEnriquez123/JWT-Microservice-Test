@@ -15,7 +15,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,14 +55,6 @@ public class BearController {
                             )
                     ),
                     @ApiResponse(
-                            responseCode = "403",
-                            description = "User has no permission to execute this request",
-                            content = @Content(
-                                    mediaType = APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = ErrorResponseDto.class)
-                            )
-                    ),
-                    @ApiResponse(
                             responseCode = "500",
                             description = "An internal error happened in the server",
                             content = @Content(
@@ -77,7 +71,7 @@ public class BearController {
             }
     )
     @GetMapping
-    public List<Bear> findAll(){
+    public List<Bear> findAll() {
         return bearRepository.findAll();
     }
 
@@ -129,13 +123,16 @@ public class BearController {
     )
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
-    public Bear saveBear(@RequestBody BearDto bear){
+    public ResponseEntity<Bear> saveBear(@RequestBody BearDto bear) {
 
-        return bearRepository.save(
-                Bear.builder()
-                .name(bear.getName())
-                .species(bear.getSpecies())
-                .build()
-        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(
+                        bearRepository.save(
+                                Bear.builder()
+                                        .name(bear.getName())
+                                        .species(bear.getSpecies())
+                                        .build()
+                        )
+                );
     }
 }
